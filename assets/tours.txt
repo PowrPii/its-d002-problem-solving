@@ -1,0 +1,8 @@
+NMT-240528, North Mongolia Taiga, 28-May-2024 08:30, 11, 10, 3699, 12, Open
+SMG-240601, South Mongolia Gobi, 01-Jun-2024 11:20, 9, 8, 3199, 15, Open
+WMA-240520, West Mongolia Altai, 20-May-2024 08:30, 12, 11, 3899, 12, Open
+CMA-240608, Central Mongolia, 08-Jun-2024 23:15, 10, 9, 3399, 15, Open
+LAD-240408, Ladakh India, 08-Apr-2024 07:35, 10, 9, 3599, 10, Closed
+KAZ-240903, Kazakhstan, 03-Sep-2024 15:35, 10, 9, 3899, 12, Open
+KYR-240708, Kyrgyzstan, 08-Jul-2024 09:45, 10, 9, 3599, 12, Open
+TAJ-240725, Tajikistan, 25-Jul-2024 18:10, 11, 10, 3899, 12, Open
