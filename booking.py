@@ -5,7 +5,7 @@ from rich import print
 from rich.prompt import Confirm
 
 from classes import Booking, Customer, GroupBooking, IndividualBooking, Tour
-from data import booking_data, customer_data, tour_data
+from data import booking_data, customer_data, new_customer_data, tour_data
 from discount import get_payable_percentage
 from menu import Menu
 from penalty import get_penalty_percentage
