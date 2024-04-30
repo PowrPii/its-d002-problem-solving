@@ -122,7 +122,7 @@ def passport_validation(data: str, selected_tour: Tour, customer_list: list[Cust
     def is_containing_one_leading_character_and_one_trailing_character():
         return data[0].isalpha() and data[1:len(data) - 1].isnumeric() and data[len(data) - 1].isalpha()
     try:
-        if len(data) < 8 and len(data) > 9:
+        if len(data) < 8 or len(data) > 9:
             raise ValidationError
         
         if not is_all_numeric() and not is_containing_one_leading_character() and not is_containing_two_leading_character() and not is_containing_one_leading_character_and_one_trailing_character():
