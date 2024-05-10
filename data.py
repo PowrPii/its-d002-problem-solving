@@ -88,7 +88,7 @@ new_customer_data = {
 
 new_discount_data = {
     "number_of_customer" : {
-        "prompt": "Enter Number of Customer",
+        "prompt": "Enter Number Of Customer",
         "data": None,
         "validation": number_of_customer_validation
     },
@@ -101,7 +101,7 @@ new_discount_data = {
 
 new_penalty_data = {
     "days" : {
-        "prompt": "Enter Number of Days",
+        "prompt": "Enter Number Of Days",
         "data": None,
         "validation": days_penalty_validation
     },
