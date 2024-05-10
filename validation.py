@@ -27,7 +27,7 @@ def departure_date_validation(data: str, *args) -> datetime:
             return departure_date
 
     except ValueError:
-        print(f"[red]\n Please enter datetime in this format: yyyy-mm-dd HH:MM[/]")
+        print(f"[red]\n Please enter datetime in this format: YYYY-MM-DD HH:MM[/]")
     except ValidationError:
         print("[red]\n The date should be at least one day from today[/]")
         
@@ -157,8 +157,10 @@ def passport_validation(data: str, selected_tour: Tour, customer_list: list[Cust
 
 def name_validation(data: str, *args) -> str:
     try:
-        if not data.isalpha():
-            raise ValidationError
+        uncceptable_character = "\|%$^&*()_+=!{[]}<>1234567890?\'\",฿"
+        for letter in uncceptable_character:
+            if letter in data:
+                raise ValidationError
             
         return data.title()
     except ValidationError:
@@ -241,9 +243,9 @@ def discount_validation(data: str, discount_scheme: dict[str, float], chosen_num
                 irregular = True
                 break
             
-            if irregular:
-                print("[orange1]\n WARNING: Irregular discount found. Please check your input thoroughly before confirming.")
-                sleep(1.5)
+        if irregular:
+            print("[orange1]\n WARNING: Irregular discount found. Please check your input thoroughly before confirming.")
+            sleep(1.5)
         
         return chosen_discount
     except ValueError:

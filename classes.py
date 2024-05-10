@@ -8,15 +8,13 @@ class Customer:
   passport_number: str
   name: str
   date_of_birth: datetime
-  contact_number: int
+  contact_number: str
 
   def get_age(self):
     today = datetime.now()
     age = today.year - self.date_of_birth.year - ((today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day))
     return age
   
-  
-
 @dataclass
 class Booking:
   booking_id: str
@@ -32,9 +30,6 @@ class IndividualBooking(Booking):
 
   def total_customer(self) -> int:
     return 1
-  
-
-
 
 @dataclass
 class GroupBooking(Booking):

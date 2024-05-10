@@ -95,7 +95,7 @@ def setup_tour(is_update=False, selected_tour: Tour=None) -> str:
             print("[white]\n Successful setup. Redirecting to tour menu...[/]" if not is_update else "[white]\n Sucessful update. Redirecting to tour menu... ")
 
         else:
-            print("Negative confirmation received. Redirecting to tour menu... ")
+            print("[white]\n Negative confirmation received. Redirecting to tour menu...[/]")
 
     except KeyboardInterrupt:
         print("[italic white]\n\n Interrupts occured. Redirecting to the tour menu...")
@@ -120,11 +120,9 @@ def update_tour() -> str:
 
             tour_code = input("\n Enter Tour Code: ")
 
-
             for tour in tour_data:
                 if tour.tour_code == tour_code:
                     selected_tour = tour
-                    print("Here")
                     break
             else:
                 print("[red]\n No tour with the given code found.[/]")
@@ -157,6 +155,11 @@ def delete_tour() -> str:
 
         for tour in tour_data:
             if tour_code == tour.tour_code:
+                if tour.total_seats_booked() > 0:
+                    print("[red]\n Unable to delete as tour has been booked. Redirecting to tour menu...[/]")
+                    sleep(1.5)
+                    return "tour_admin_menu"
+                
                 Menu.refresh()
                 print("\n[bold] Delete Tour Selection\n[/]")
                 print(generate_tour_table([tour]))
@@ -168,7 +171,7 @@ def delete_tour() -> str:
                     print(f"[italic not bold white]\n Unsucessful deletion of tour {tour_code}. Redirecting back...[/]")
                 break
         else:
-            print(f"[red]\n Tour Not Found in database. Redirecting to tour menu ...")
+            print(f"[red]\n Tour not found in database. Redirecting to tour menu ...")
     except KeyboardInterrupt:
         print("[italic white]\n\n Interrupts occured. Redirecting to tour menu...")
 

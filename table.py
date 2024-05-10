@@ -3,12 +3,6 @@ from classes import Tour, IndividualBooking, GroupBooking, Customer
 from rich.table import Table
 from datetime import datetime
 
-def generate_booking_id():
-    if len(booking_data) == 0:
-        return "0001"
-    
-    return f"{int(booking_data[len(booking_data) - 1].booking_id) + 1:04d}"
-
 def generate_tour_table(tour_data: list[Tour]) -> Table:
     table = Table()
 

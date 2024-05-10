@@ -10,7 +10,6 @@ from discount import get_payable_percentage
 from menu import Menu
 from penalty import get_penalty_percentage
 from table import (
-    generate_booking_id,
     generate_booking_table,
     generate_customer_table,
     generate_open_tour_table,
@@ -28,6 +27,12 @@ def get_booked_tour() -> list[Tour]:
             booked_tour.append(tour)
 
     return booked_tour
+
+def generate_booking_id():
+    if len(booking_data) == 0:
+        return "0001"
+    
+    return f"{int(booking_data[len(booking_data) - 1].booking_id) + 1:04d}"
 
 def get_cost(tour_code, number_of_customer):
     chosen_tour: Tour = None
@@ -155,7 +160,7 @@ def create_booking() -> str:
 
         confirmation = Confirm.ask("\n Please confirm your choices [magenta][Y/N][/]", 
                                    show_choices=False)
-
+        
         if confirmation:
             for current_customer in customers_list:
                 for customer in customer_data:
@@ -164,7 +169,7 @@ def create_booking() -> str:
                 else:
                     customer_data.append(current_customer)
 
-            if len(customer_data) == 1:
+            if len(customers_list) == 1:
                 booking = IndividualBooking(
                     booking_id=generate_booking_id(),
                     booking_date=datetime.now(),
@@ -212,7 +217,6 @@ def cancel_booking():
         selected_tour: Tour = None
         for booking in booking_data:
             if booking.booking_id == booking_id:
-                print(booking.booking_id)
                 selected_booking = booking
                 break
         else:
@@ -245,8 +249,6 @@ def cancel_booking():
         elif isinstance(selected_booking, GroupBooking):
             print(generate_customer_table(selected_booking.customer_list))
 
-        
-        
         remaining_days = selected_tour.departure_date.date() - selected_booking.booking_date.date()
         if selected_booking.booking_date.date() == datetime.now().date():
             print(" \n There will be no cancallation penalty.")
@@ -289,7 +291,6 @@ def search_booking():
         selected_booking: Booking = None
         for booking in booking_data:
             if booking.booking_id == booking_id:
-                print(booking.booking_id)
                 selected_booking = booking
                 break
         else:
@@ -329,7 +330,7 @@ def booking_report():
     try:
         Menu.refresh()
         print("[bold]\n Booking Report\n")
-        print(generate_reportable_tour_table(), "[italic] Only Tours with bookings can generate thier report")
+        print(generate_reportable_tour_table(), "[italic]\n Only Tours with bookings can generate their reports.")
         tour_code = input("\n Enter Tour Code: ")
         tours = tour_code.split(",")
 
@@ -347,12 +348,11 @@ def booking_report():
         ungeneratable_tours: list[Tour] = []
         generatable_tours: list[Tour] = []
         for chosen_tour in chosen_tours:
-            for tour in get_booked_tour():
-                if chosen_tour.tour_code == tour.tour_code:
-                    generatable_tours.append(tour)
+                if chosen_tour in get_booked_tour():
+                    generatable_tours.append(chosen_tour)
                     break
-            else:
-                ungeneratable_tours.append(tour)
+                else:
+                    ungeneratable_tours.append(chosen_tour)
         
         if len(ungeneratable_tours) != 0:
             for tour in ungeneratable_tours:
