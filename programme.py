@@ -155,9 +155,6 @@ class Programme:
       except KeyError:
         print("[red]\n Invalid option![/]")
         sleep(1.5)
-      except NotImplementedError:
-        print("[red]\n This function has not been implemented yet")
-        sleep(1.5)
       except KeyboardInterrupt:
         print("")
         self.exit_programme()
