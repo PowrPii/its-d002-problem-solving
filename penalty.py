@@ -1,18 +1,17 @@
-from data import cancellation_penalty, new_penalty_data
 from rich import print
 from rich.prompt import Confirm
 from menu import Menu
 from table import generate_penalty_table
 from time import sleep
 
-def get_penalty_percentage(remaining_days):
+def get_penalty_percentage(cancellation_penalty, remaining_days):
     for days, percentage in cancellation_penalty.items():
         if remaining_days >= int(days):
             return percentage
     else:
         return 0
     
-def save_penalty_data():
+def save_penalty_data(cancellation_penalty):
     with open('assets/penalties.txt', 'w') as file:
         data = ""
         for days, penalty in cancellation_penalty.items():
@@ -20,9 +19,7 @@ def save_penalty_data():
         
         file.write(data)
 
-def add_penalty(is_update=False, chosen_number_of_days: int=None):
-    global cancellation_penalty
-
+def add_penalty(tour_data, booking_data, customer_data, discount_scheme, cancellation_penalty, available_tour, new_tour_data, new_customer_data, new_discount_data, new_penalty_data, is_update=False, chosen_number_of_days: int=None):
     try:
         while new_penalty_data["penalty"]["data"] is None:
             Menu.refresh()
@@ -63,7 +60,7 @@ def add_penalty(is_update=False, chosen_number_of_days: int=None):
         if confirmation:
             cancellation_penalty[str(new_penalty_data["days"]["data"])] = new_penalty_scheme[str(new_penalty_data["days"]["data"])]
             cancellation_penalty = {k: cancellation_penalty[k] for k in sorted(cancellation_penalty, key=lambda x: int(x), reverse=True)}
-            save_penalty_data()
+            save_penalty_data(cancellation_penalty)
             print("[white]\n Successful setup. Redirecting to discount menu...[/]" if not is_update else "[white]\n Sucessful update. Redirecting to discount menu... ")
         else:
             print("[white]\n Negative confirmation received. Redirecting to discount menu... ")
@@ -78,7 +75,7 @@ def add_penalty(is_update=False, chosen_number_of_days: int=None):
         sleep(1.5)
         return "cancellation_penalty_menu"
 
-def update_penalty():
+def update_penalty(tour_data, booking_data, customer_data, discount_scheme, cancellation_penalty, available_tour, new_tour_data, new_customer_data, new_discount_data, new_penalty_data):
     chosen_number_of_days = None
     try:
         while chosen_number_of_days is None:
@@ -91,14 +88,14 @@ def update_penalty():
                 sleep(1.5)
                 return "cancellation_penalty_menu"
 
-        add_penalty(is_update=True, chosen_number_of_days=int(chosen_number_of_days))
+        add_penalty(tour_data, booking_data, customer_data, discount_scheme, cancellation_penalty, available_tour, new_tour_data, new_customer_data, new_discount_data, new_penalty_data, is_update=True, chosen_number_of_days=int(chosen_number_of_days))
     except KeyboardInterrupt:
         print("[italic white]\n\n Interrupts occured. Redirecting to the discount menu...")
 
     sleep(1.5)
     return "cancellation_penalty_menu"
 
-def remove_penalty():
+def remove_penalty(tour_data, booking_data, customer_data, discount_scheme, cancellation_penalty, available_tour, new_tour_data, new_customer_data, new_discount_data, new_penalty_data):
     chosen_number_of_days = None
     try:
         while chosen_number_of_days is None:
@@ -121,7 +118,7 @@ def remove_penalty():
 
         if confirmation:
             del cancellation_penalty[chosen_number_of_days]
-            save_penalty_data()
+            save_penalty_data(cancellation_penalty)
             print("[white]\n Successful deletion. Redirecting to discount menu...[/]")
         else:
             print("Negative confirmation received. Redirecting to discount menu... ")

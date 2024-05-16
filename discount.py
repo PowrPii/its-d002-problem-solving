@@ -1,19 +1,17 @@
-from data import discount_scheme, new_discount_data
 from rich import print
 from rich.prompt import Confirm
-from rich.table import Table
 from menu import Menu
 from table import generate_discount_table
 from time import sleep
 
-def get_payable_percentage(total_customer: int):
+def get_payable_percentage(discount_scheme, total_customer: int):
     for number_of_customer, discount in discount_scheme.items():
         if total_customer >= int(number_of_customer):
             return 1 - discount
     else:
         return 1
     
-def save_discount_data():
+def save_discount_data(discount_scheme):
     with open('assets/discounts.txt', 'w') as file:
         data = ""
         for number_of_customer, discount in discount_scheme.items():
@@ -21,9 +19,7 @@ def save_discount_data():
         
         file.write(data)
     
-def add_scheme(is_update=False, chosen_number_of_customer: int=None):
-    global discount_scheme
-
+def add_scheme(tour_data, booking_data, customer_data, discount_scheme, cancellation_penalty, available_tour, new_tour_data, new_customer_data, new_discount_data, new_penalty_data, is_update=False, chosen_number_of_customer: int=None):
     try:
         while new_discount_data["discount"]["data"] is None:
             Menu.refresh()
@@ -64,7 +60,7 @@ def add_scheme(is_update=False, chosen_number_of_customer: int=None):
         if confirmation:
             discount_scheme[str(new_discount_data["number_of_customer"]["data"])] = new_discount_scheme[str(new_discount_data["number_of_customer"]["data"])]
             discount_scheme = {k: discount_scheme[k] for k in sorted(discount_scheme, key=lambda x: int(x), reverse=True)}
-            save_discount_data()
+            save_discount_data(discount_scheme)
             print("[white]\n Successful setup. Redirecting to discount menu...[/]" if not is_update else "[white]\n Sucessful update. Redirecting to discount menu... ")
         else:
             print("[white]\n Negative confirmation received. Redirecting to discount menu... ")
@@ -80,7 +76,7 @@ def add_scheme(is_update=False, chosen_number_of_customer: int=None):
         return "discount_scheme_menu"
     
 
-def update_scheme():
+def update_scheme(tour_data, booking_data, customer_data, discount_scheme, cancellation_penalty, available_tour, new_tour_data, new_customer_data, new_discount_data, new_penalty_data):
     chosen_number_of_customer = None
     try:
         while chosen_number_of_customer is None:
@@ -93,14 +89,14 @@ def update_scheme():
                 sleep(1.5)
                 return "discount_scheme_menu"
 
-        add_scheme(is_update=True, chosen_number_of_customer=int(chosen_number_of_customer))
+        add_scheme(tour_data, booking_data, customer_data, discount_scheme, cancellation_penalty, available_tour, new_tour_data, new_customer_data, new_discount_data, new_penalty_data, is_update=True, chosen_number_of_customer=int(chosen_number_of_customer))
     except KeyboardInterrupt:
         print("[italic white]\n\n Interrupts occured. Redirecting to the discount menu...")
 
     sleep(1.5)
     return "discount_scheme_menu"
 
-def remove_scheme():
+def remove_scheme(tour_data, booking_data, customer_data, discount_scheme, cancellation_penalty, available_tour, new_tour_data, new_customer_data, new_discount_data, new_penalty_data):
     chosen_number_of_customer = None
     try:
         while chosen_number_of_customer is None:
@@ -123,7 +119,7 @@ def remove_scheme():
 
         if confirmation:
             del discount_scheme[chosen_number_of_customer]
-            save_discount_data()
+            save_discount_data(discount_scheme)
             print("[white]\n Successful deletion. Redirecting to discount menu...[/]")
         else:
             print("Negative confirmation received. Redirecting to discount menu... ")

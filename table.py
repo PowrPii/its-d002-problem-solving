@@ -1,4 +1,3 @@
-from data import tour_data, booking_data
 from classes import Tour, IndividualBooking, GroupBooking, Customer
 from rich.table import Table
 from datetime import datetime
@@ -45,7 +44,7 @@ def generate_open_tour_table(tour_list: list[Tour]) -> Table:
 
     return table
 
-def generate_reportable_tour_table() -> Table:
+def generate_reportable_tour_table(tour_data) -> Table:
     table = Table()
 
     table.add_column("Tour Code", justify="center", style="yellow")
@@ -86,7 +85,7 @@ def generate_report_table(tour: Tour) -> Table:
                 
     return table
 
-def generate_booking_table() -> Table:
+def generate_booking_table(booking_data) -> Table:
     table = Table()
 
     table.add_column("Booking ID", justify="left", style="cyan")

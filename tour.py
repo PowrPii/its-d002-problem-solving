@@ -4,11 +4,10 @@ from rich import print
 from rich.prompt import Confirm
 from menu import Menu
 from time import sleep
-from data import tour_data, avaliable_tour, new_tour_data
 from datetime import datetime
 from table import generate_tour_table
 
-def save_tour_data():
+def save_tour_data(tour_data):
     with open('assets/tours.txt', 'w') as file:
         data = ""
         for tour in tour_data:
@@ -16,7 +15,7 @@ def save_tour_data():
         
         file.write(data)
     
-def list_tour() -> str:
+def list_tour(tour_data, booking_data, customer_data, discount_scheme, cancellation_penalty, available_tour, new_tour_data, new_customer_data, new_discount_data, new_penalty_data) -> str:
     try:
         Menu.refresh()
         print("\n[bold] List of Tour\n[/]", generate_tour_table(tour_data), "[white]\n Press Enter to continue...[/]")
@@ -27,15 +26,13 @@ def list_tour() -> str:
     
     return "tour_admin_menu"
 
-def setup_tour(is_update=False, selected_tour: Tour=None) -> str:
-    global tour_data, new_tour_data
-
+def setup_tour(tour_data, booking_data, customer_data, discount_scheme, cancellation_penalty, available_tour, new_tour_data, new_customer_data, new_discount_data, new_penalty_data, is_update=False, selected_tour: Tour=None) -> str:
     if not is_update:
         avaliable_tour_table = Table()
         avaliable_tour_table.add_column("Tour Code", justify="center", style="yellow")
         avaliable_tour_table.add_column("Tour Name", justify="left", style="cyan")
 
-        for tour_code, tour_name in avaliable_tour.items():
+        for tour_code, tour_name in available_tour.items():
             avaliable_tour_table.add_row(tour_code, tour_name)
 
     try:
@@ -69,7 +66,7 @@ def setup_tour(is_update=False, selected_tour: Tour=None) -> str:
 
         new_tour = Tour(
             tour_code= new_tour_data["tour_code"]["data"][:3] + "-" + datetime.strftime(new_tour_data["departure_date"]["data"], "%y%m%d"),
-            tour_name=avaliable_tour[new_tour_data["tour_code"]["data"][:3]],
+            tour_name=available_tour[new_tour_data["tour_code"]["data"][:3]],
             departure_date=new_tour_data["departure_date"]["data"],
             days=new_tour_data["days"]["data"],
             nights=new_tour_data["nights"]["data"],
@@ -91,7 +88,7 @@ def setup_tour(is_update=False, selected_tour: Tour=None) -> str:
 
         if confirmation:
             tour_data.append(new_tour)
-            save_tour_data()
+            save_tour_data(tour_data)
             print("[white]\n Successful setup. Redirecting to tour menu...[/]" if not is_update else "[white]\n Sucessful update. Redirecting to tour menu... ")
 
         else:
@@ -107,9 +104,7 @@ def setup_tour(is_update=False, selected_tour: Tour=None) -> str:
         sleep(1.5)
         return "tour_admin_menu"
 
-def update_tour() -> str:
-    global tour_data
-
+def update_tour(tour_data, booking_data, customer_data, discount_scheme, cancellation_penalty, available_tour, new_tour_data, new_customer_data, new_discount_data, new_penalty_data) -> str:
     try:
         selected_tour = None
         
@@ -136,7 +131,7 @@ def update_tour() -> str:
             new_tour_data["nights"]["data"] = selected_tour.nights
             new_tour_data["cost_per_pax"]["data"] = selected_tour.cost_per_pax
 
-        setup_tour(is_update=True, selected_tour=selected_tour)
+        setup_tour(tour_data, booking_data, customer_data, discount_scheme, cancellation_penalty, available_tour, new_tour_data, new_customer_data, new_discount_data, new_penalty_data, is_update=True, selected_tour=selected_tour)
 
     except KeyboardInterrupt:
         print("[italic white]\n\n Interrupts occured. Redirecting to tour menu...")
@@ -144,9 +139,7 @@ def update_tour() -> str:
     sleep(1.5) 
     return "tour_admin_menu"
 
-def delete_tour() -> str:
-    global tour_data
-
+def delete_tour(tour_data, booking_data, customer_data, discount_scheme, cancellation_penalty, available_tour, new_tour_data, new_customer_data, new_discount_data, new_penalty_data,) -> str:
     try:
         Menu.refresh()
         print("\n[bold] Delete Tour\n[/]")
@@ -165,7 +158,7 @@ def delete_tour() -> str:
                 print(generate_tour_table([tour]))
                 if Confirm.ask("\n Please confirm your choice [magenta][Y/N][/]", show_choices=False):
                     tour_data.remove(tour)
-                    save_tour_data()
+                    save_tour_data(tour_data)
                     print(f"[italic not bold white]\n Successful deletion of Tour {tour_code}. Redirecting back...[/]")
                 else:
                     print(f"[italic not bold white]\n Unsucessful deletion of tour {tour_code}. Redirecting back...[/]")

@@ -5,7 +5,6 @@ from rich import print
 from rich.prompt import Confirm
 
 from classes import Booking, Customer, GroupBooking, IndividualBooking, Tour
-from data import booking_data, customer_data, new_customer_data, tour_data
 from discount import get_payable_percentage
 from menu import Menu
 from penalty import get_penalty_percentage
@@ -19,7 +18,7 @@ from table import (
 from validation import customer_age_requirement_validation
 
 
-def get_booked_tour() -> list[Tour]:
+def get_booked_tour(tour_data) -> list[Tour]:
     booked_tour = []
 
     for tour in tour_data:
@@ -28,22 +27,21 @@ def get_booked_tour() -> list[Tour]:
 
     return booked_tour
 
-def generate_booking_id():
+def generate_booking_id(booking_data):
     if len(booking_data) == 0:
         return "0001"
     
     return f"{int(booking_data[len(booking_data) - 1].booking_id) + 1:04d}"
 
-def get_cost(tour_code, number_of_customer):
+def get_cost(tour_data, discount_scheme, tour_code, number_of_customer):
     chosen_tour: Tour = None
     for tour in tour_data:
         if tour.tour_code == tour_code:
             chosen_tour = tour
     
-    return number_of_customer * chosen_tour.cost_per_pax * get_payable_percentage(number_of_customer)
+    return number_of_customer * chosen_tour.cost_per_pax * get_payable_percentage(discount_scheme, number_of_customer)
 
-
-def update_booking_and_customer_data():
+def update_booking_and_customer_data(booking_data, customer_data):
     with open('assets/bookings.txt', 'w') as file:
         data = ""
         for booking in booking_data:
@@ -68,9 +66,7 @@ def update_booking_and_customer_data():
 
         file.write(data)
 
-def create_booking() -> str:
-    global new_customer_data
-
+def create_booking(tour_data, booking_data, customer_data, discount_scheme, cancellation_penalty, available_tour, new_tour_data, new_customer_data, new_discount_data, new_penalty_data) -> str:
     try:
         customers_list: list[Customer] = []
         selected_tour: Tour = None
@@ -151,10 +147,10 @@ def create_booking() -> str:
 
         Menu.refresh()
         print(f"[bold bright_white]\n {selected_tour.tour_name} ({selected_tour.tour_code}) Booking Confirmation[/]")
-        print(f"[not bold bright_white]\n Booking ID: {generate_booking_id()}")
+        print(f"[not bold bright_white]\n Booking ID: {generate_booking_id(booking_data)}")
         print(f"[not bold bright_white] Duration: {selected_tour.days} Days {selected_tour.nights} Nights")
         print(f"[not bold bright_white] Departs on {datetime.strftime(selected_tour.departure_date, '%d %B %Y, %H:%M')}")
-        print(f"[not bold bright_white] Total Seats: {len(customers_list)}, Total Cost: ${get_cost(selected_tour.tour_code, len(customers_list)):.2f}")
+        print(f"[not bold bright_white] Total Seats: {len(customers_list)}, Total Cost: ${get_cost(tour_data, discount_scheme, selected_tour.tour_code, len(customers_list)):.2f}")
         print(f"[not bold bright_white] Capicity: {selected_tour.capacity}, Avaliable seats: {selected_tour.avaliable_seats()}\n")
         print(generate_customer_table(customers_list))
 
@@ -171,14 +167,14 @@ def create_booking() -> str:
 
             if len(customers_list) == 1:
                 booking = IndividualBooking(
-                    booking_id=generate_booking_id(),
+                    booking_id=generate_booking_id(booking_data),
                     booking_date=datetime.now(),
                     tour_code=selected_tour.tour_code,
                     customer=customers_list[0]
                 )
             else:
                 booking = GroupBooking(
-                    booking_id=generate_booking_id(),
+                    booking_id=generate_booking_id(booking_data),
                     booking_date=datetime.now(),
                     tour_code=selected_tour.tour_code,
                     customer_list=customers_list
@@ -187,7 +183,7 @@ def create_booking() -> str:
             booking_data.append(booking)
             selected_tour.bookings.append(booking)
 
-            update_booking_and_customer_data()
+            update_booking_and_customer_data(booking_data, customer_data)
 
             print("[white]\n Successful booking. Redirecting to booking menu...[/]")
         else:
@@ -199,17 +195,17 @@ def create_booking() -> str:
     sleep(1.5)
     return "tour_booking_menu"
 
-def cancel_booking():
+def cancel_booking(tour_data, booking_data, customer_data, discount_scheme, cancellation_penalty, available_tour, new_tour_data, new_customer_data, new_discount_data, new_penalty_data):
     try:
         Menu.refresh()
         print("[bold]\n Cancel Booking\n")
 
         if len(booking_data) == 0:
-            print("[white] No booking at the moment. Rediecting to booking menu...")
+            print("[white] No booking at the moment. Redirecting to booking menu...")
             sleep(1.5)
             return "tour_booking_menu"
         else:
-            print(generate_booking_table())
+            print(generate_booking_table(booking_data))
 
         booking_id = input("\n Enter Booking ID: ")
 
@@ -243,7 +239,7 @@ def cancel_booking():
         print(f"\n[not bold bright_white] Booking ID: {selected_booking.booking_id}[/]")
         print(f"[not bold bright_white] Duration: {selected_tour.days} Days {selected_tour.nights} Nights")
         print(f"[not bold bright_white] Departs on {datetime.strftime(selected_tour.departure_date, '%d %B %Y, %H:%M')}")
-        print(f"[not bold bright_white] Total Seats: {selected_booking.total_customer()}, Total Cost: ${get_cost(selected_tour.tour_code, selected_booking.total_customer()):.2f}\n")
+        print(f"[not bold bright_white] Total Seats: {selected_booking.total_customer()}, Total Cost: ${get_cost(tour_data, discount_scheme, selected_tour.tour_code, selected_booking.total_customer()):.2f}\n")
         if isinstance(selected_booking, IndividualBooking):
             print(generate_customer_table([selected_booking.customer]))
         elif isinstance(selected_booking, GroupBooking):
@@ -253,7 +249,7 @@ def cancel_booking():
         if selected_booking.booking_date.date() == datetime.now().date():
             print(" \n There will be no cancallation penalty.")
         else:
-            cancellation_penalty_amount = get_cost(selected_tour.tour_code, selected_booking.total_customer()) * get_penalty_percentage(remaining_days.days)
+            cancellation_penalty_amount = get_cost(tour_data, discount_scheme, selected_tour.tour_code, selected_booking.total_customer()) * get_penalty_percentage(cancellation_penalty,remaining_days.days)
             print(f"[not bold orange1] \n There will be a cancallation penalty of ${cancellation_penalty_amount:.2f}.")
         
         confirmation = Confirm.ask("\n Please confirm your choices [magenta][Y/N][/]", show_choices=False)
@@ -262,7 +258,7 @@ def cancel_booking():
             booking_data.remove(booking)
             selected_tour.bookings.remove(booking)
 
-            update_booking_and_customer_data()
+            update_booking_and_customer_data(booking_data, customer_data)
 
             print("[white]\n Successful cancallation. Redirecting to booking menu...[/]")
         else:
@@ -274,7 +270,7 @@ def cancel_booking():
     return "tour_booking_menu"
 
 
-def search_booking():
+def search_booking(tour_data, booking_data, customer_data, discount_scheme, cancellation_penalty, available_tour, new_tour_data, new_customer_data, new_discount_data, new_penalty_data):
     try:
         Menu.refresh()
         print("[bold]\n Search Booking\n")
@@ -284,7 +280,7 @@ def search_booking():
             sleep(1.5)
             return "tour_booking_menu"
         else:
-            print(generate_booking_table())
+            print(generate_booking_table(booking_data))
 
         booking_id = input("\n Enter Booking ID: ")
 
@@ -312,7 +308,7 @@ def search_booking():
         print(f"\n[not bold bright_white] Booking ID: {selected_booking.booking_id}[/]")
         print(f"[not bold bright_white] Duration: {selected_tour.days} Days {selected_tour.nights} Nights")
         print(f"[not bold bright_white] Departs on {datetime.strftime(selected_tour.departure_date, '%d %B %Y, %H:%M')}")
-        print(f"[not bold bright_white] Total Seats: {selected_booking.total_customer()}, Total Cost: ${get_cost(selected_tour.tour_code, selected_booking.total_customer()):.2f}")
+        print(f"[not bold bright_white] Total Seats: {selected_booking.total_customer()}, Total Cost: ${get_cost(tour_data, discount_scheme, selected_tour.tour_code, selected_booking.total_customer()):.2f}")
         print(f"[not bold bright_white] Capicity: {selected_tour.capacity}, Avaliable seats: {selected_tour.avaliable_seats()}\n")
         if isinstance(selected_booking, IndividualBooking):
             print(generate_customer_table([selected_booking.customer]))
@@ -326,11 +322,11 @@ def search_booking():
     sleep(1.5)
     return "tour_booking_menu"
 
-def booking_report():
+def booking_report(tour_data, booking_data, customer_data, discount_scheme, cancellation_penalty, available_tour, new_tour_data, new_customer_data, new_discount_data, new_penalty_data):
     try:
         Menu.refresh()
         print("[bold]\n Booking Report\n")
-        print(generate_reportable_tour_table(), "[italic]\n Only Tours with bookings can generate their reports.")
+        print(generate_reportable_tour_table(tour_data), "[italic]\n Only Tours with bookings can generate their reports.")
         tour_code = input("\n Enter Tour Code: ")
         tours = tour_code.split(",")
 
@@ -348,7 +344,7 @@ def booking_report():
         ungeneratable_tours: list[Tour] = []
         generatable_tours: list[Tour] = []
         for chosen_tour in chosen_tours:
-                if chosen_tour in get_booked_tour():
+                if chosen_tour in get_booked_tour(tour_data):
                     generatable_tours.append(chosen_tour)
                     break
                 else:
